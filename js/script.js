@@ -161,3 +161,19 @@ form.addEventListener('submit', e => {
         e.preventDefault();
     };
 });
+
+//Accessibility 
+
+//Adds event listeners to Focus and Blur events of activities fields, adding focus classname to parent, or removing focus classname from parent
+for (let i = 0; i < checkBoxes.length; i++){
+    checkBoxes[i].addEventListener('focus', e => {
+        console.log("focus");
+        e.target.parentElement.className = "focus";
+    });
+    checkBoxes[i].addEventListener('blur', e => {
+        console.log("remove");
+        e.target.parentElement.classList.remove("focus");
+    });
+};
+
+
