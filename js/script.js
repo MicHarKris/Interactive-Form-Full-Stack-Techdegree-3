@@ -23,11 +23,13 @@ jobTitle.addEventListener("input", e => {
     }
 });
 
-//displays the color menu, when active, and displays only the selected colors, by matching the selected 'e.target.value' to the 'data-theme' of the options within the 'color' element
+//displays the color menu, when active, and displays only the selected colors, by matching the selected 
+// 'e.target.value' to the 'data-theme' of the options within the 'color' element
 designMenu.addEventListener("input", e => {
     colorMenu.style.display = "initial";
     const design = e.target.value;
-    //loops through all colors, assigns them hidden attribute if they don't match, clears hidden attribute, and selects first
+    //loops through all colors, assigns them hidden attribute if they don't match, clears hidden attribute
+    // and selects first
     for(let i = 0; i < colors.options.length; i++){
         if(design === colors.options[i].getAttribute('data-theme')){
             colors.options[i].hidden = false;
@@ -47,7 +49,8 @@ const activitiesBox = document.getElementById("activities-box");
 const activitiesCost = document.getElementById("activities-cost");
 var currentCost = 0;
 
-//updates the price displayed in the Total, when an activity is selected, by adding price when ticked 'yes', and subtracting price when ticked 'no'
+//updates the price displayed in the Total, when an activity is selected, by adding price when ticked 'yes', 
+// and subtracting price when ticked 'no'
 activitiesBox.addEventListener("input", e => {
     if (e.target.checked) {
         currentCost += Number(e.target.getAttribute('data-cost'));
@@ -55,6 +58,7 @@ activitiesBox.addEventListener("input", e => {
         currentCost -= Number(e.target.getAttribute('data-cost'));
     }
     activitiesCost.innerHTML = `Total: \$${currentCost}`;
+    validator(activities);
 });
 
 //Payment Section
@@ -68,7 +72,8 @@ const bitCoin = document.getElementById("bitcoin");
 //Sets selected payment type to Credit Card by default
 payment.querySelector(`[value="credit-card"]`).selected = true;
 
-//removes the visual aspect of all payment options, and activates the one that corresponds to the selection - defaults to credit-card
+//removes the visual aspect of all payment options, and activates the one that corresponds to the selection
+// defaults to credit-card
 function updatePayments(paymentType){
     payPal.style.display = "none";
     bitCoin.style.display = "none"; 
@@ -108,113 +113,92 @@ const cardNumber = document.getElementById("cc-num");
 const zipCode = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
 
-
-//checks that name and email has been filled out, when called
-function basicInfoValidator(){
-    const nameValue = name.value;
-    const emailValue = email.value;
-
-    const nameIsValid = /^[a-zA-Z]+ ?[a-zA-Z]*? ?[a-zA-Z]*?$/.test(nameValue); 
-    const emailIsValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue);
-
-    if (nameIsValid){
-        name.parentElement.classList.add("valid");
-        name.parentElement.classList.remove("not-valid");
-    } else {    
-        name.parentElement.classList.add("not-valid");
-        name.parentElement.classList.remove("valid");
-    }
-
-    if (emailIsValid){
-        email.parentElement.classList.add("valid");
-        email.parentElement.classList.remove("not-valid");
-    } else {    
-        email.parentElement.classList.add("not-valid");
-        email.parentElement.classList.remove("valid");
-    }
-
-    if (nameIsValid && emailIsValid) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-//checks that activities has been selected, when called
-function activitiesValidator(){
-    let checkBoxControlValue = 0;   
-
-    for (let i = 0; i < checkBoxes.length; i++) {
-        if (!checkBoxes[i].checked) {
-            checkBoxControlValue++;
-            console.log(checkBoxControlValue);
-        }
-    }
-    
-    if (checkBoxControlValue === checkBoxes.length) {
-        activities.classList.add("not-valid");
-        activities.classList.remove("valid");
-        return false;
-    } else {
-        activities.classList.add("valid");
-        activities.classList.remove("not-valid");
-        return true;
+// the validator coes through a switch to the corresponding test for the current field, and calls the hintsetter for
+// either a true or false value of the regular expression test.
+function validator(infoField){
+    switch (infoField){
+        case name:
+            const nameValue = name.value;
+            infoField = infoField.parentElement;
+            const nameValid = /^[a-zA-Z]+ ?[a-zA-Z]*? ?[a-zA-Z]*?$/.test(nameValue);  
+            hintSetter(nameValid, infoField);
+            break;
+        case email: 
+            const emailValue = email.value;
+            infoField = infoField.parentElement;
+            const emailValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue); 
+            hintSetter(emailValid, infoField);
+            break;
+        case activities: 
+            let checkBoxControlValue = 0;    
+            for (let i = 0; i < checkBoxes.length; i++) {
+                if (!checkBoxes[i].checked) {
+                    checkBoxControlValue++;
+                }
+            }
+            if (checkBoxControlValue === checkBoxes.length) {
+                const activatesValid = false;
+                hintSetter(activatesValid, infoField);
+            } else {
+                const activatesValid = true;
+                hintSetter(activatesValid, infoField);
+            }
+            break;
+        case cardNumber:
+            const cardNumberValue = cardNumber.value;
+            infoField = infoField.parentElement;
+            const cardNumberValid = /^\d{13,16}$/.test(cardNumberValue); 
+            hintSetter(cardNumberValid, infoField);
+            break;
+        case zipCode:
+            const zipCodeValue = zipCode.value;
+            infoField = infoField.parentElement;
+            const zipCodeValid = /^\d{5}$/.test(zipCodeValue);
+            hintSetter(zipCodeValid, infoField);
+            break;
+        case cvv:
+            const cvvValue = cvv.value;
+            infoField = infoField.parentElement;
+            const cvvValid = /^\d{3}$/.test(cvvValue); 
+            hintSetter(cvvValid, infoField);
+            break;
     }
 }
-//checks that payment info has been selected, and filled out if credit-card is selected, when called
-function paymentValidator(){
-    paymentType = payment.value;
 
-    const cardNumberValue = cardNumber.value;
-    const zipCodeValue = zipCode.value;
-    const cvvValue = cvv.value; 
-
-    if (paymentType === "credit-card") {
-        const cardNumberIsValid = /^\d{13,16}$/.test(cardNumberValue); 
-        const zipCodeIsValid = /^\d{5}$/.test(zipCodeValue); 
-        const cvvIsValid = /^\d{3}$/.test(cvvValue); 
-
-        if (cardNumberIsValid){
-            cardNumber.parentElement.classList.add("valid");
-            cardNumber.parentElement.classList.remove("not-valid");
-        } else {    
-            cardNumber.parentElement.classList.add("not-valid");
-            cardNumber.parentElement.classList.remove("valid");
-        }
-    
-        if (zipCodeIsValid){
-            zipCode.parentElement.classList.add("valid");
-            zipCode.parentElement.classList.remove("not-valid");
-        } else {    
-            zipCode.parentElement.classList.add("not-valid");
-            zipCode.parentElement.classList.remove("valid");
-        }
-
-        if (cvvIsValid){
-            cvv.parentElement.classList.add("valid");
-            cvv.parentElement.classList.remove("not-valid");
-        } else {    
-            cvv.parentElement.classList.add("not-valid");
-            cvv.parentElement.classList.remove("valid");
-        }
-
-        if (cardNumberIsValid && zipCodeIsValid && cvvIsValid) {
-            return true;
-        } else {
-            return false;
-        }
-
-    } else {
+// the hintSetter function runs the changes in the DOM to hide or show warnings and hints
+function hintSetter(isValid, infoField){
+    if (isValid){
+        infoField.classList.add("valid");
+        infoField.classList.remove("not-valid");
+        infoField.lastElementChild.style.display = "";
         return true;
+    } else {    
+        infoField.classList.add("not-valid");
+        infoField.classList.remove("valid");
+        infoField.lastElementChild.style.display = "initial";
+        return false;
     }
 }
 
 //prevents reloading of page, if fields are not filled out, when Register ('submit') os selected
 form.addEventListener('submit', e => {
-    const basicInfoCheck = basicInfoValidator();
-    const paymentCheck = paymentValidator();
-    const ActivitiesCheck = activitiesValidator();
-    if (!basicInfoValidator() || !paymentValidator() || !activitiesValidator()) {
+    const nameCheck = validator(name);
+    const emailCheck = validator(email);
+    
+    paymentType = payment.value;
+    if (paymentType === "credit-card") {
+        const cardNumberCheck = validator(cardNumber);
+        const zipCodeCheck = validator(zipCode);
+        const cvvCheck = validator(cvv);
+
+        if (!cardNumberCheck || !zipCodeCheck || !cvvCheck) {
+            e.preventDefault();
+        }
+    }
+
+    const activitiesCheck = validator(activities);
+
+    if (!nameCheck || !emailCheck || !activitiesCheck) {
         e.preventDefault();
     };
 });
@@ -231,4 +215,19 @@ for (let i = 0; i < checkBoxes.length; i++){
     });
 };
 
-
+//Key based eventlisteners for validation, when a key is released, the validator is run for that field.
+name.addEventListener('keyup', e => {
+    validator(name);
+});
+email.addEventListener('keyup', e => {
+    validator(email);
+});
+cardNumber.addEventListener('keyup', e => {
+    validator(cardNumber);
+});
+zipCode.addEventListener('keyup', e => {
+    validator(zipCode);
+});
+cvv.addEventListener('keyup', e => {
+    validator(cvv);
+});
