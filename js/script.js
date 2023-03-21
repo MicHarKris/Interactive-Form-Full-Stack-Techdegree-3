@@ -121,14 +121,12 @@ function validator(infoField){
             const nameValue = name.value;
             infoField = infoField.parentElement;
             const nameValid = /^[a-zA-Z]+ ?[a-zA-Z]*? ?[a-zA-Z]*?$/.test(nameValue);  
-            hintSetter(nameValid, infoField);
-            break;
+            return isValid = hintSetter(nameValid, infoField);
         case email: 
             const emailValue = email.value;
             infoField = infoField.parentElement;
             const emailValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue); 
-            hintSetter(emailValid, infoField);
-            break;
+            return isValid = hintSetter(emailValid, infoField);
         case activities: 
             let checkBoxControlValue = 0;    
             for (let i = 0; i < checkBoxes.length; i++) {
@@ -138,30 +136,26 @@ function validator(infoField){
             }
             if (checkBoxControlValue === checkBoxes.length) {
                 const activatesValid = false;
-                hintSetter(activatesValid, infoField);
+                return isValid = hintSetter(activatesValid, infoField);
             } else {
                 const activatesValid = true;
-                hintSetter(activatesValid, infoField);
+                return isValid = hintSetter(activatesValid, infoField);
             }
-            break;
         case cardNumber:
             const cardNumberValue = cardNumber.value;
             infoField = infoField.parentElement;
             const cardNumberValid = /^\d{13,16}$/.test(cardNumberValue); 
-            hintSetter(cardNumberValid, infoField);
-            break;
+            return isValid = hintSetter(cardNumberValid, infoField);
         case zipCode:
             const zipCodeValue = zipCode.value;
             infoField = infoField.parentElement;
             const zipCodeValid = /^\d{5}$/.test(zipCodeValue);
-            hintSetter(zipCodeValid, infoField);
-            break;
+            return isValid = hintSetter(zipCodeValid, infoField);
         case cvv:
             const cvvValue = cvv.value;
             infoField = infoField.parentElement;
             const cvvValid = /^\d{3}$/.test(cvvValue); 
-            hintSetter(cvvValid, infoField);
-            break;
+            return isValid = hintSetter(cvvValid, infoField);
     }
 }
 
@@ -171,6 +165,7 @@ function hintSetter(isValid, infoField){
         infoField.classList.add("valid");
         infoField.classList.remove("not-valid");
         infoField.lastElementChild.style.display = "";
+        console.log(infoField);
         return true;
     } else {    
         infoField.classList.add("not-valid");
@@ -180,8 +175,14 @@ function hintSetter(isValid, infoField){
     }
 }
 
-//prevents reloading of page, if fields are not filled out, when Register ('submit') os selected
+//prevents reloading of page, if fields are not filled out, when Register ('submit') os selected.
+//when submit is registered, the user has attempted a completion, and none of the fields should be considered passive.
+// also calls validator on all fields, to check for errors in filling out the form.
 form.addEventListener('submit', e => {
+    for (const key in passive){
+        passive[key] = false;
+    }
+
     const nameCheck = validator(name);
     const emailCheck = validator(email);
     
@@ -200,12 +201,13 @@ form.addEventListener('submit', e => {
 
     if (!nameCheck || !emailCheck || !activitiesCheck) {
         e.preventDefault();
-    };
+    }
 });
 
 //Accessibility 
 
-//Adds event listeners to Focus and Blur events of activities fields, adding focus classname to parent, or removing focus classname from parent
+//Adds event listeners to Focus and Blur events of activities fields, adding focus classname to parent, 
+// or removing focus classname from parent
 for (let i = 0; i < checkBoxes.length; i++){
     checkBoxes[i].addEventListener('focus', e => {
         e.target.parentElement.classList.add("focus");
@@ -213,21 +215,65 @@ for (let i = 0; i < checkBoxes.length; i++){
     checkBoxes[i].addEventListener('blur', e => {
         e.target.parentElement.classList.remove("focus");
     });
-};
+}
 
-//Key based eventlisteners for validation, when a key is released, the validator is run for that field.
+//an object holding the passive values for each field, to manage whether or not the field should instantly address errors
+const passive ={
+    name: true,
+    email: true,
+    cardNumber: true,
+    zipCode: true,
+    cvv: true
+}
+
+//Key based eventlisteners for validation, when a key is released, the validator is run for that field, if the field is not passive.
+//Whenever a field register a blur, it is considered no longer passive, and calls the validator function.
 name.addEventListener('keyup', e => {
+    if (!passive.name){
+        validator(name);
+    }
+});
+name.addEventListener('blur', e => {
+    passive.name = false
     validator(name);
 });
+
 email.addEventListener('keyup', e => {
+    if (!passive.email){
+        validator(email);
+    }
+});
+email.addEventListener('blur', e => {
+    passive.email = false
     validator(email);
 });
+
 cardNumber.addEventListener('keyup', e => {
+    if (!passive.cardNumber){
+        validator(cardNumber);
+    }
+});
+cardNumber.addEventListener('blur', e => {
+    passive.cardNumber = false
     validator(cardNumber);
 });
+
 zipCode.addEventListener('keyup', e => {
+    if (!passive.zipCode){
+        validator(zipCode);
+    }
+});
+zipCode.addEventListener('blur', e => {
+    passive.zipCode = false
     validator(zipCode);
 });
+
 cvv.addEventListener('keyup', e => {
+    if (!passive.cvv){
+        validator(cvv);
+    }
+});
+cvv.addEventListener('blur', e => {
+    passive.cvv = false
     validator(cvv);
 });
