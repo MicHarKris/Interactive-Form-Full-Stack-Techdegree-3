@@ -47,16 +47,45 @@ designMenu.addEventListener("input", e => {
 const activities = document.getElementById("activities");
 const activitiesBox = document.getElementById("activities-box");
 const activitiesCost = document.getElementById("activities-cost");
+const checkBoxes = document.querySelectorAll("#activities-box input[type='checkbox']");
+
 var currentCost = 0;
 
 //updates the price displayed in the Total, when an activity is selected, by adding price when ticked 'yes', 
 // and subtracting price when ticked 'no'
 activitiesBox.addEventListener("input", e => {
-    if (e.target.checked) {
-        currentCost += Number(e.target.getAttribute('data-cost'));
+    const activity = e.target;
+
+    // Also looks for cases where the time of the currently selected even, is the same as another event, 
+    // and marks the evnets as mutually exclusive, if selected
+    if (activity.checked) {
+        currentCost += Number(activity.getAttribute('data-cost')); 
+        if (activity.getAttribute('name') != "all"){
+            currentTime = activity.getAttribute('data-day-and-time');
+            currentName = activity.getAttribute("name")
+            for (let i = 1; i < checkBoxes.length; i++){
+                boxTime = checkBoxes[i].getAttribute("data-day-and-time");
+                boxName = checkBoxes[i].getAttribute("name");
+                if (currentTime === boxTime && currentName != boxName){
+                    checkBoxes[i].parentElement.classList.add("disabled");
+                }
+            }
+        }
     } else {
-        currentCost -= Number(e.target.getAttribute('data-cost'));
+        currentCost -= Number(activity.getAttribute('data-cost'));
+        if (activity.getAttribute('name') != "all"){
+            currentTime = activity.getAttribute('data-day-and-time');
+            currentName = activity.getAttribute("name")
+            for (let i = 1; i < checkBoxes.length; i++){
+                boxTime = checkBoxes[i].getAttribute("data-day-and-time");
+                boxName = checkBoxes[i].getAttribute("name");
+                if (currentTime === boxTime && currentName != boxName){
+                    checkBoxes[i].parentElement.classList.remove("disabled");
+                }
+            }
+        }
     }
+
     activitiesCost.innerHTML = `Total: \$${currentCost}`;
     validator(activities);
 });
@@ -106,8 +135,6 @@ const form = document.querySelector("form");
 
 const name = document.getElementById("name");
 const email = document.getElementById("email");
-
-const checkBoxes = document.querySelectorAll("#activities-box input[type='checkbox']");
 
 const cardNumber = document.getElementById("cc-num");
 const zipCode = document.getElementById("zip");
@@ -165,7 +192,6 @@ function hintSetter(isValid, infoField){
         infoField.classList.add("valid");
         infoField.classList.remove("not-valid");
         infoField.lastElementChild.style.display = "";
-        console.log(infoField);
         return true;
     } else {    
         infoField.classList.add("not-valid");
