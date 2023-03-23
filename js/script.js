@@ -51,36 +51,37 @@ const checkBoxes = document.querySelectorAll("#activities-box input[type='checkb
 
 var currentCost = 0;
 
-//updates the price displayed in the Total, when an activity is selected, by adding price when ticked 'yes', 
+// updates the price displayed in the Total, when an activity is selected, by adding price when ticked 'yes', 
 // and subtracting price when ticked 'no'
 activitiesBox.addEventListener("input", e => {
     const activity = e.target;
 
-    // Also looks for cases where the time of the currently selected even, is the same as another event, 
-    // and marks the evnets as mutually exclusive, if selected
-    if (activity.checked) {
-        currentCost += Number(activity.getAttribute('data-cost')); 
-        if (activity.getAttribute('name') != "all"){
-            currentTime = activity.getAttribute('data-day-and-time');
-            currentName = activity.getAttribute("name")
-            for (let i = 1; i < checkBoxes.length; i++){
-                boxTime = checkBoxes[i].getAttribute("data-day-and-time");
-                boxName = checkBoxes[i].getAttribute("name");
-                if (currentTime === boxTime && currentName != boxName){
-                    checkBoxes[i].parentElement.classList.add("disabled");
-                }
-            }
+    const currentTime = activity.getAttribute('data-day-and-time');
+    const currentName = activity.getAttribute("name")
+
+    if (activity.getAttribute('name') === "all"){
+        if (activity.checked){
+            currentCost += Number(activity.getAttribute('data-cost')); 
+        } else {
+            currentCost -= Number(activity.getAttribute('data-cost')); 
         }
-    } else {
-        currentCost -= Number(activity.getAttribute('data-cost'));
-        if (activity.getAttribute('name') != "all"){
-            currentTime = activity.getAttribute('data-day-and-time');
-            currentName = activity.getAttribute("name")
-            for (let i = 1; i < checkBoxes.length; i++){
-                boxTime = checkBoxes[i].getAttribute("data-day-and-time");
-                boxName = checkBoxes[i].getAttribute("name");
-                if (currentTime === boxTime && currentName != boxName){
+    }
+     
+    // Also looks for cases where the time of the currently selected even, is the same as another event, 
+    // and marks the events as mutually exclusive, if selected
+    if (activity.getAttribute('name') != "all"){
+        for (let i = 1; i < checkBoxes.length; i++){
+            const boxTime = checkBoxes[i].getAttribute("data-day-and-time");
+            const boxName = checkBoxes[i].getAttribute("name");
+            if (currentTime === boxTime && currentName != boxName){
+                if (activity.checked){
+                    currentCost += Number(activity.getAttribute('data-cost'));  
+                    checkBoxes[i].parentElement.classList.add("disabled");
+                    checkBoxes[i].disabled = true;
+                } else {
+                    currentCost -= Number(activity.getAttribute('data-cost')); 
                     checkBoxes[i].parentElement.classList.remove("disabled");
+                    checkBoxes[i].disabled = false;
                 }
             }
         }
@@ -140,19 +141,28 @@ const cardNumber = document.getElementById("cc-num");
 const zipCode = document.getElementById("zip");
 const cvv = document.getElementById("cvv");
 
-// the validator coes through a switch to the corresponding test for the current field, and calls the hintsetter for
-// either a true or false value of the regular expression test.
+// the validator goes through a switch to the corresponding test for the current field, and calls the hintsetter 
+// for either a true or false value of the regular expression test.
 function validator(infoField){
     switch (infoField){
         case name:
             const nameValue = name.value;
-            infoField = infoField.parentElement;
             const nameValid = /^[a-zA-Z]+ ?[a-zA-Z]*? ?[a-zA-Z]*?$/.test(nameValue);  
+            infoField = infoField.parentElement;
+            if (nameValue === "") {
+                infoField.lastElementChild.innerHTML = "Name field cannot be blank";
+            } else if (nameValid === false) {
+                infoField.lastElementChild.innerHTML = "Name must be formatted correctly";
+            }
             return isValid = hintSetter(nameValid, infoField);
         case email: 
             const emailValue = email.value;
-            infoField = infoField.parentElement;
             const emailValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue); 
+            infoField = infoField.parentElement;if (emailValue === "") {
+                infoField.lastElementChild.innerHTML = "Email field cannot be blank";
+            } else if (emailValid === false) {
+                infoField.lastElementChild.innerHTML = "Email field must be formatted correctly";
+            }
             return isValid = hintSetter(emailValid, infoField);
         case activities: 
             let checkBoxControlValue = 0;    
@@ -170,18 +180,33 @@ function validator(infoField){
             }
         case cardNumber:
             const cardNumberValue = cardNumber.value;
-            infoField = infoField.parentElement;
             const cardNumberValid = /^\d{13,16}$/.test(cardNumberValue); 
+            infoField = infoField.parentElement;
+            if (cardNumberValue === "") {
+                infoField.lastElementChild.innerHTML = "Card Number cannot be blank";
+            } else if (cardNumberValid === false) {
+                infoField.lastElementChild.innerHTML = "Credit card number must be between 13 - 16 digits";
+            }
             return isValid = hintSetter(cardNumberValid, infoField);
         case zipCode:
             const zipCodeValue = zipCode.value;
-            infoField = infoField.parentElement;
             const zipCodeValid = /^\d{5}$/.test(zipCodeValue);
+            infoField = infoField.parentElement;
+            if (zipCodeValue === "") {
+                infoField.lastElementChild.innerHTML = "Zip Code cannot be blank";
+            } else if (zipCodeValid === false) {
+                infoField.lastElementChild.innerHTML = "Zip Code must be 5 digits";
+            }
             return isValid = hintSetter(zipCodeValid, infoField);
         case cvv:
             const cvvValue = cvv.value;
-            infoField = infoField.parentElement;
             const cvvValid = /^\d{3}$/.test(cvvValue); 
+            infoField = infoField.parentElement;
+            if (cvvValue === "") {
+                infoField.lastElementChild.innerHTML = "CVV cannot be blank";
+            } else if (cvvValid === false) {
+                infoField.lastElementChild.innerHTML = "CVV must be 3 digits";
+            }
             return isValid = hintSetter(cvvValid, infoField);
     }
 }
